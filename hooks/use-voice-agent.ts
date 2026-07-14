@@ -433,19 +433,27 @@ export function useVoiceAgent() {
         source.connect(analyser)
         analyserRef.current = analyser
 
-        // create call record
-        const callRes = await fetch("/api/calls", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            personaId: persona.id,
-            personaName: persona.name,
-            language: persona.language,
-          }),
-        })
-        const call = await callRes.json()
-        callIdRef.current = call.id
-        setCallId(call.id)
+        // Use persistence when configured; otherwise keep the call session in memory.
+        let sessionId = Date.now()
+        try {
+          const callRes = await fetch("/api/calls", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              personaId: persona.id,
+              personaName: persona.name,
+              language: persona.language,
+            }),
+          })
+          if (callRes.ok) {
+            const call = await callRes.json()
+            if (typeof call.id === "number") sessionId = call.id
+          }
+        } catch {
+          // A database is optional for live voice calls.
+        }
+        callIdRef.current = sessionId
+        setCallId(sessionId)
         startTimeRef.current = Date.now()
         setElapsed(0)
         timerRef.current = setInterval(() => {

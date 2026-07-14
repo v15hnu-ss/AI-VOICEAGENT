@@ -47,11 +47,21 @@ async function executeTool(name: string, args: Record<string, unknown>, callId: 
     try {
       const scheduledAt = new Date(String(args.scheduled_at))
       if (isNaN(scheduledAt.getTime())) return { success: false, error: "Invalid date" }
+      const title = String(args.title || "Appointment")
+      if (!process.env.DATABASE_URL) {
+        return {
+          success: true,
+          temporary: true,
+          booking_id: `demo-${Date.now()}`,
+          scheduled_at: scheduledAt.toISOString(),
+          title,
+        }
+      }
       const [row] = await db
         .insert(bookings)
         .values({
           callId: callId ?? null,
-          title: String(args.title || "Appointment"),
+          title,
           contactName: args.contact_name ? String(args.contact_name) : null,
           scheduledAt,
           notes: args.notes ? String(args.notes) : null,

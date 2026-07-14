@@ -3,6 +3,7 @@ import { personas } from "@/lib/db/schema"
 import { asc } from "drizzle-orm"
 
 export async function GET() {
+  if (!process.env.DATABASE_URL) return Response.json([])
   const rows = await db.select().from(personas).orderBy(asc(personas.id))
   return Response.json(rows)
 }

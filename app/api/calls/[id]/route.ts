@@ -25,6 +25,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (!Number.isFinite(callId)) return Response.json({ error: "Invalid id" }, { status: 400 })
 
   const body = await req.json()
+  if (!process.env.DATABASE_URL) {
+    return Response.json({ id: callId, ...body, temporary: true })
+  }
   const update: Record<string, unknown> = {}
 
   if (body.status) update.status = body.status

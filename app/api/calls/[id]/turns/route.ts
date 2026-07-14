@@ -8,6 +8,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   const { speaker, content, latencyMs } = await req.json()
   if (!speaker || !content) return Response.json({ error: "Missing fields" }, { status: 400 })
+  if (!process.env.DATABASE_URL) {
+    return Response.json({ id: Date.now(), callId, speaker, content, latencyMs, temporary: true })
+  }
 
   const [row] = await db
     .insert(transcriptTurns)
