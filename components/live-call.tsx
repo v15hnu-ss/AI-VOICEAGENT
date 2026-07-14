@@ -9,7 +9,38 @@ import { useVoiceAgent, type Persona } from "@/hooks/use-voice-agent"
 import { cn } from "@/lib/utils"
 import { CalendarCheck, Clock, Gauge, Mic, MicOff, Phone, PhoneOff, Zap } from "lucide-react"
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+const DEFAULT_PERSONAS: Persona[] = [
+  {
+    id: 1,
+    name: "Ananya — Sales Consultant",
+    role: "sales consultant",
+    description: "A warm, persuasive Telugu sales consultant",
+    language: "telugu",
+    voice: "anushka",
+    greeting: "నమస్కారం! నేను అనన్య. మీకు ఈరోజు ఎలా సహాయం చేయగలను?",
+    systemPrompt:
+      "You are Ananya, a warm and concise Telugu sales consultant. Speak naturally in Telugu, understand Telugu mixed with English, ask one question at a time, and never invent product details.",
+    isDefault: true,
+  },
+  {
+    id: 2,
+    name: "Arjun — Appointment Assistant",
+    role: "appointment assistant",
+    description: "A friendly Hinglish booking assistant",
+    language: "hinglish",
+    voice: "abhilash",
+    greeting: "Namaste! Main Arjun hoon. Aaj main aapki kaise help kar sakta hoon?",
+    systemPrompt:
+      "You are Arjun, a friendly and efficient appointment assistant. Speak natural Hinglish, keep replies brief, ask one question at a time, and confirm dates and times before booking.",
+  },
+]
+
+const fetcher = async (url: string) => {
+  const response = await fetch(url)
+  if (!response.ok) return DEFAULT_PERSONAS
+  const data = await response.json()
+  return Array.isArray(data) && data.length > 0 ? data : DEFAULT_PERSONAS
+}
 
 const STATE_LABEL: Record<string, string> = {
   idle: "Ready",
